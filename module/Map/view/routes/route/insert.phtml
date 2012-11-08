@@ -1,0 +1,27 @@
+<div class="content">
+    <form method="POST" action="<?php echo $this->basePath() . '/routes/insert'; ?>">
+        <div class="div-buses">
+            <?php foreach ($this->buses as $bus) : ?>
+                <input type="radio" value="<?php echo $bus->getIdBus(); ?>" name="bus" />
+                <?php echo $bus->getIdBus() . ' - ' . $bus->getDescription(); ?><br />
+            <?php endforeach; ?>
+        </div>
+        <div class="div-points">
+            <table>
+                <th>Marcar</th>
+                <th>Identifica&ccedil;&atilde;o</th>
+                <th>Observa&ccedil;&atilde;o</th>
+                <?php foreach ($this->points as $point) : ?>
+                    <tr>
+                        <td><input type="checkbox" value="<?php echo $point->getIdPoint(); ?>" name="points[]" /></td>
+                        <td><?php echo $point->getLabel(); ?></td>
+                        <td><?php echo $point->getObs(); ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </table>
+        </div>
+        <div align="center">
+            <input type="submit" value="Enviar" name="submit" />
+        </div>
+    </form>
+</div>

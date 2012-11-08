@@ -1,0 +1,60 @@
+<input type="hidden" id="base-path" value="<?php echo $this->basePath(); ?>" />
+
+<div class="sidebar">
+    <h3>Como chegar</h3>
+
+    <div>
+        <div><input type="text" value="" name="start" id="start" placeholder="Entre com o ponto de origem" /></div>
+        <div><input type="text" value="" name="end" id="end" placeholder="Entre com o ponto de destino" /></div>
+        <div><input type="submit" value="Como chegar" id="btn-trace-route" onclick="getStartEndLatLng($('#start').val(), $('#end').val());"/></div>
+    </div>
+
+    <br />
+    <div id="routes" class="ui-widget ui-widget-content ui-corner-all ui-buttonset">
+        <h3>Rotas</h3>
+        <?php foreach ($this->routes as $route): ?>
+            <div id="item-menu-<?php echo $route->getIdBus(); ?>" value="<?php echo $route->getIdBus(); ?>" class="item-menu" onclick="getRoute('<?php echo $route->getIdBus(); ?>');">
+                <?php echo $route->getIdBus() . ' - ' . $route->getDescription(); ?>
+            </div>
+        <?php endforeach; ?>
+    </div>
+</div>
+
+<div class="map" id="map_canvas">
+
+</div>
+
+<div id="new-point" style="display: none;" title="Cadastrar novo ponto">
+    <div id="div-message" style="display: none;"></div>
+
+    <table>
+        <tr>
+            <td>Identifica&ccedil;&atilde;o</td>
+            <td><input type="text" name="label" value="" id="label"/></td>
+        </tr>  
+        <tr>
+            <td>Latitude</td>
+            <td><input type="text" name="latitude" value="" id="latitude"/></td>
+        </tr>  
+        <tr>
+            <td>Longitude</td>
+            <td><input type="text" name="longitude" value="" id="longitude"/></td>
+        </tr>  
+        <tr>
+            <td>Qnt. &ocirc;nibus</td>
+            <td><input type="text" name="qnt_bus" value="" id="qnt_bus"/></td>
+        </tr>  
+        <tr>
+            <td>Observa&ccedil;&atilde;o</td>
+            <td><textarea name="obs" id="obs"></textarea></td>
+        </tr>  
+        <tr>
+            <td>
+                <div align="center">
+                    <input type="submit" name="submit" value="Salvar" onclick="newPoint();"/>
+                    <input type="reset" name="reset" value="Limpar" id="reset-fields" />
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>

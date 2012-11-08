@@ -1,0 +1,20 @@
+<div class="content">
+    <?php
+    $form = $this->form;
+
+    $form->setAttribute('action', $this->url('routes', array('controller' => 'point', 'action' => 'new')));
+
+    $form->prepare();
+    echo $this->form()->openTag($form);
+
+    echo $this->formRow($form->get('idpoint'));
+    echo $this->formRow($form->get('label'));
+    echo $this->formRow($form->get('latitude'));
+    echo $this->formRow($form->get('longitude'));
+    echo $this->formRow($form->get('qnt_bus'));
+    echo $this->formRow($form->get('obs')) . '<br />';
+    echo $this->formSubmit($form->get('submit'));
+
+    echo $this->form()->closeTag();
+    ?>
+</div>

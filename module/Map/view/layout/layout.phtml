@@ -1,0 +1,74 @@
+<?php echo $this->doctype(); ?>
+
+<html lang="en">
+    <head>
+        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
+        <script src="<?php echo $this->basePath() . '/js/jquery.min.js'; ?>"></script>
+        <script src="<?php echo $this->basePath() . '/js/jquery-ui.min.js'; ?>"></script>
+
+        <meta name="viewport" charset="utf-8" content="initial-scale=1.0, user-scalable=no" />
+
+        <?php echo $this->headTitle('BusMap Palmas')->setSeparator(' - ')->setAutoEscape(false) ?>
+
+        <?php echo $this->headMeta()->appendName('viewport', 'width=device-width, initial-scale=1.0') ?>
+
+        <!-- Le styles -->
+        <?php
+        echo $this->headLink(array('rel' => 'shortcut icon', 'type' => 'image/vnd.microsoft.icon', 'href' => $this->basePath() . '/images/favicon.ico'))
+                ->prependStylesheet($this->basePath() . '/css/bootstrap-responsive.min.css')
+                ->prependStylesheet($this->basePath() . '/css/style.css')
+                ->prependStylesheet($this->basePath() . '/css/bootstrap.min.css')
+                ->prependStylesheet($this->basePath() . '/css/jquery-ui.css')
+        ?>
+
+        <!-- Scripts -->
+        <?php
+        echo $this->headScript()->prependFile($this->basePath() . '/js/html5.js', 'text/javascript', array('conditional' => 'lt IE 9',))
+                ->prependFile($this->basePath() . '/js/prettify.js')
+                ->prependFile($this->basePath() . '/js/map.bootstrap.js')
+        ?>
+        <script type="text/javascript">
+            $(document).ready( function() {
+                initPrettify();
+                initialize(); 
+            });
+        </script>
+    </head>
+
+    <body>
+        <!-- Inicializa as funcões js -->
+
+        <div class="navbar navbar-inverse navbar-fixed-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="<?php echo $this->url('home'); ?>">BusMap</a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav">
+                            <li class="active"><a href="<?php echo $this->basePath() . '/home'; ?>">Home</a></li>
+                            <li class="active"><a href="<?php echo $this->basePath() . '/routes'; ?>">Rotas</a></li>
+                            <li class="active"><a href="<?php echo $this->basePath() . '/buses'; ?>">&Ocirc;nibus</a></li>
+                            <li class="active"><a href="<?php echo $this->basePath() . '/point'; ?>">Pontos</a></li>
+                        </ul>
+                    </div><!--/.nav-collapse -->
+                </div>
+            </div>
+        </div>
+
+        <div class="container" style="height: 100%; width: 100%">        
+            <?php echo $this->content; ?>
+        </div> <!-- /container -->
+
+        <div class="footer">
+            <footer>
+                <p>BusMap Palmas</p>
+            </footer>
+        </div> <!-- /footer -->
+
+        <?php echo $this->inlineScript() ?>
+    </body>
+</html>

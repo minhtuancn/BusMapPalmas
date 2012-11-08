@@ -1,0 +1,32 @@
+
+<div class="content">
+    <h1>Pontos</h1>
+    <br />
+    <a href="<?php echo $this->basePath() . '/point/new'; ?>">Cadastrar novo ponto</a>
+    <br /><br />
+    <div>
+        <table class="roundtable">
+            <tbody>
+                <tr>
+                    <th>ID</th>
+                    <th>Identifica&ccedil;&atilde;o</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>Qtde. de &ocirc;nibus</th>
+                    <th>Observa&ccedil;&atilde;o</th>
+                </tr>
+
+                <?php foreach ($this->points as $point) : ?>
+                    <tr>
+                        <td><?php echo $point->getIdPoint(); ?></td>
+                        <td><?php echo $point->getLabel(); ?></td>
+                        <td><?php echo $point->getLatitude(); ?></td>
+                        <td><?php echo $point->getLongitude(); ?></td>
+                        <td><?php echo $point->getQntBus(); ?></td>
+                        <td><?php echo $point->getObs(); ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
