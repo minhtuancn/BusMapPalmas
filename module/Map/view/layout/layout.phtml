@@ -36,8 +36,20 @@
     </head>
 
     <body>
-        <!-- Inicializa as funcões js -->
-
+        <!--- DIV "PROCESSANDO" -->
+        <div class="pro-growl">
+            <div id="processing" class="pro-growl-item-container">
+                <div class="pro-growl-item">
+                    <img class="pro-growl-image" src="<?php echo $this->basePath() . '/images/loading.gif' ?>">
+                        <div class="pro-growl-message">
+                            <span class="pro-growl-title">Processando ...</span>
+                            <p></p>
+                        </div>
+                        <div style="clear: both;"></div>
+                </div>
+            </div>
+        </div>
+        
         <div class="navbar navbar-inverse navbar-fixed-top">
             <div class="navbar-inner">
                 <div class="container">
@@ -59,7 +71,8 @@
             </div>
         </div>
 
-        <div class="container" style="height: 100%; width: 100%">        
+        <div class="container" style="height: 100%; width: 100%">     
+            
             <?php echo $this->content; ?>
         </div> <!-- /container -->
 

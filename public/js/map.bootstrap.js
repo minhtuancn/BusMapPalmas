@@ -11,6 +11,7 @@ var directionsDisplay;
 var directionsService = new google.maps.DirectionsService();
 var points = [];    
 var markerArray = [];
+var batches = []; // pontos intermediários para a rota
 
 function initialize() {
     // coordenadas de Palmas: -10.18392,-48.33375
@@ -42,6 +43,7 @@ function initialize() {
     
     // adiciona pontos
     createMarkers();
+    clearOverlays();
 }
     
 function getStartEndLatLng(label1, label2) {
@@ -55,44 +57,126 @@ function getStartEndLatLng(label1, label2) {
         },
         dataType: "json",
         success: function(data) {
-            //console.log(data);
             //calcula Rota
             // pega origem e destino da rota
             var start = new google.maps.LatLng(data.latLngStart.lat, data.latLngStart.lng);
             var end = new google.maps.LatLng(data.latLngEnd.lat, data.latLngEnd.lng);
-            var waypts = null;
+            // var waypts = null; // aqui vão os trechos das rotas
             
-            calcRoute(start, end, waypts);
+            
+            // var myWayPoints = <recebe os pontos calculados no algoritmo de busca>
+            // colocar ponto inicial e final na sub-rota
+            // count: contar tamanho do objeto json trazido do php
+            // walkAway8Points(myWayPoints, count)
+            // calcRoute();
         }
     });
 }
 
-// calcula rota    
-// DEBUG: está sendo feito um teste para traçar uma rota em todos os pontos cadastrados
-function calcRoute(start, end) {
-    var waypts = [];
+// pega rota do ônibus 
+function getRoute(idbus) {
+    $('#processing').show();
     
-    //    for(var i = 0; i < 5; i++) {
-    //        var latLng = new google.maps.LatLng(points[i]['latitude'],points[i]['longitude']);
-    //        
-    //        waypts.push({
-    //            location: latLng,
-    //            stopover: false
-    //        });
-    //    }
-    
-    var request = {
-        origin:start,
-        destination:end,
-        waypoints:waypts,
-        travelMode: google.maps.TravelMode.DRIVING
-    };
-    
-    directionsService.route(request, function(result, status) {    
-        if (status == google.maps.DirectionsStatus.OK) {
-            directionsDisplay.setDirections(result);
+    $.ajax({
+        type: "POST",
+        url: $('#base-path').val() + '/routes/getRoute',
+        async: true,
+        data: {
+            idbus: idbus
+        },
+        dataType: "json",
+        success: function(data) {
+            var count = 0;
+            
+            $.each(data.points, function(index, array) {
+                count++;
+            });
+            walkAway8Points(data.points, count);
+            calcRoute();
+            
+            $('#processing').hide();
         }
-    });
+    });    
+}
+
+// mostra rota do ônibus "burlando" o máximo de waypoints da API
+function calcRoute() {
+    var combinedResults;
+    var directionsResultsReturned = 0;
+        
+    for (var k = 0; k < batches.length; k++) {
+        var lastIndex = batches[k].length - 1; 
+        var start = batches[k][0].location;
+        var end = batches[k][lastIndex].location;   // um ônibus sai e volta para o mesmo ponto
+
+        // trim first and last entry from array
+        var waypts = [];
+        waypts = batches[k];
+        waypts.splice(0, 1);
+        waypts.splice(waypts.length - 1, 1);
+        
+        var request = {
+            origin: start,
+            destination: end,
+            waypoints: waypts,
+            travelMode: google.maps.TravelMode.DRIVING
+        };
+        directionsService.route(request, function (result, status) {
+            
+            if (status == google.maps.DirectionsStatus.OK) {
+                if (directionsResultsReturned == 0) { // first bunch of results in. new up the combinedResults object
+                    combinedResults = result;
+                    directionsResultsReturned++;
+                } else {
+                    // only building up legs, overview_path, and bounds in my consolidated object. This is not a complete
+                    // directionResults object, but enough to draw a path on the map, which is all I need
+                    combinedResults.routes[0].legs = combinedResults.routes[0].legs.concat(result.routes[0].legs);
+                    combinedResults.routes[0].overview_path = combinedResults.routes[0].overview_path.concat(result.routes[0].overview_path);
+
+                    combinedResults.routes[0].bounds = combinedResults.routes[0].bounds.extend(result.routes[0].bounds.getNorthEast());
+                    combinedResults.routes[0].bounds = combinedResults.routes[0].bounds.extend(result.routes[0].bounds.getSouthWest());
+                    directionsResultsReturned++;
+                }
+                if (directionsResultsReturned == batches.length) // we've received all the results. put to map
+                    directionsDisplay.setOptions({
+                        suppressMarkers: true 
+                    });
+                directionsDisplay.setDirections(combinedResults);
+            }
+        });
+    }
+}
+
+// "burlando" a API do Google
+function walkAway8Points(myWayPoints, count) {
+    var itemsPerBatch = 10; // google API max - 1 start, 1 stop, and 8 waypoints
+    var itemsCounter = 0;
+    var wayptsExist = count > 0;
+    batches = [];
+    
+    while (wayptsExist) {
+        var subBatch = [];
+        var subitemsCounter = 0;
+        
+        for (var j = itemsCounter; j < count; j++) {            
+            subitemsCounter++;
+            
+            subBatch.push({
+                location: new google.maps.LatLng(myWayPoints[j].latitude, myWayPoints[j].longitude),
+                stopover: false
+            });
+            
+            if (subitemsCounter == itemsPerBatch)
+                break;
+        }
+
+        itemsCounter += subitemsCounter;
+        batches.push(subBatch);
+        wayptsExist = itemsCounter < count;
+        // If it runs again there are still points. Minus 1 before continuing to 
+        // start up with end of previous tour leg
+        itemsCounter--;
+    }
 }
 
 // adicionar um marcador no mapa com sua posição, ícone, indetificação e observação
@@ -109,8 +193,8 @@ function addMarker(location, markerIcon, label, obs) {
     google.maps.event.addListener(marker, 'dblclick', function(event) {
         $('#new-point').dialog('open');
         
-        $('#latitude').val(marker.getPosition().Ya);
-        $('#longitude').val(marker.getPosition().Za);
+        $('#latitude').val(marker.getPosition().$a);
+        $('#longitude').val(marker.getPosition().ab);
     });
     
     var infoString = '<strong>Identificação</strong>: '+label+
@@ -139,7 +223,7 @@ function getMarkers() {
         datatype: "json",
         async: false,
         success: function(data) {
-            for(i = 0; i < data.latlng.length; i++) {
+            for(var i = 0; i < data.latlng.length; i++) {
                 var line = [];
                 line['latitude'] = data.latlng[i].latitude;
                 line['longitude'] = data.latlng[i].longitude;
@@ -199,4 +283,22 @@ function newPoint() {
 
 function removePoint(marker) {
     marker.setMap(null);
+}
+
+// Removes the overlays from the map, but keeps them in the array
+function clearOverlays() {
+    if (markerArray) {
+        for (i in markerArray) {
+            markerArray[i].setMap(null);
+        }
+    }
+}
+
+// Shows any overlays currently in the array
+function showOverlays() {
+    if (markerArray) {
+        for (i in markerArray) {
+            markerArray[i].setMap(map);
+        }
+    }
 }

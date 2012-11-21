@@ -34,7 +34,7 @@ class BusController extends AbstractActionController {
                     'form' => $form
                 ));
     }
-
+    
     public function insertAction() {
         $form = new FormBus();
         $request = $this->getRequest();
