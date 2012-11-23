@@ -7,7 +7,8 @@ use Zend\Mvc\ModuleRouteListener,
     Doctrine\ORM\EntityManager,
     Map\Service\Point as PointService,
     Map\Service\Bus as BusService,
-    Map\Service\BusPoint as BusPointService;
+    Map\Service\BusPoint as BusPointService,
+    Map\Service\Connection as ConnectionService;
 
 class Module {
 
@@ -37,6 +38,9 @@ class Module {
                 },
                 'Map\Service\BusPoint' => function($service) {
                     return new BusPointService($service->get('Doctrine\ORM\EntityManager'));
+                },
+                'Map\Service\Connection' => function($service) {
+                    return new ConnectionService($service->get('Doctrine\ORM\EntityManager'));
                 }
             ),
         );

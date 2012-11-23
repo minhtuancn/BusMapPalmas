@@ -13,4 +13,15 @@ function initPrettify() {
         hide: 'explode',
         autoOpen: false 
     });
+    
+    $("#outputRoute").dialog({
+        bgiframe: true,
+        modal: true,
+        width:'480px',
+        height:'auto',
+        overflow: 'auto',
+        show: 'explode',
+        hide: 'explode',
+        autoOpen: false 
+    });
 }

@@ -12,6 +12,8 @@ var directionsService = new google.maps.DirectionsService();
 var points = [];    
 var markerArray = [];
 var batches = []; // pontos intermediários para a rota
+var points_id = [];
+var indexPts = 0;
 
 function initialize() {
     // coordenadas de Palmas: -10.18392,-48.33375
@@ -61,14 +63,14 @@ function getStartEndLatLng(label1, label2) {
             // pega origem e destino da rota
             var start = new google.maps.LatLng(data.latLngStart.lat, data.latLngStart.lng);
             var end = new google.maps.LatLng(data.latLngEnd.lat, data.latLngEnd.lng);
-            // var waypts = null; // aqui vão os trechos das rotas
+        // var waypts = null; // aqui vão os trechos das rotas
             
             
-            // var myWayPoints = <recebe os pontos calculados no algoritmo de busca>
-            // colocar ponto inicial e final na sub-rota
-            // count: contar tamanho do objeto json trazido do php
-            // walkAway8Points(myWayPoints, count)
-            // calcRoute();
+        // var myWayPoints = <recebe os pontos calculados no algoritmo de busca>
+        // colocar ponto inicial e final na sub-rota
+        // count: contar tamanho do objeto json trazido do php
+        // walkAway8Points(myWayPoints, count)
+        // calcRoute();
         }
     });
 }
@@ -137,11 +139,12 @@ function calcRoute() {
                     combinedResults.routes[0].bounds = combinedResults.routes[0].bounds.extend(result.routes[0].bounds.getSouthWest());
                     directionsResultsReturned++;
                 }
-                if (directionsResultsReturned == batches.length) // we've received all the results. put to map
+                if (directionsResultsReturned == batches.length) { // we've received all the results. put to map
                     directionsDisplay.setOptions({
                         suppressMarkers: true 
                     });
-                directionsDisplay.setDirections(combinedResults);
+                    directionsDisplay.setDirections(combinedResults);
+                }
             }
         });
     }
@@ -292,6 +295,10 @@ function clearOverlays() {
             markerArray[i].setMap(null);
         }
     }
+    
+    directionsDisplay.setDirections({
+        routes: []
+    });
 }
 
 // Shows any overlays currently in the array
@@ -301,4 +308,102 @@ function showOverlays() {
             markerArray[i].setMap(map);
         }
     }
+}
+
+// salva ponto da rota instântaneo
+function saveInstant(idbus, idpoint) {
+    $('#processing').show();
+    
+    $.ajax({
+        type: "POST",
+        url: $('#base-path').val()+'/routes/insert',
+        data: {
+            idbus: idbus,
+            idpoint: idpoint
+        },
+        success: function(data) {
+            if(data.success == true) {
+                $('#processing').hide();
+                $("#gritter-item-success").html('Salvo com sucesso!');
+                $("#gritter-item-success").slideDown(300).delay(5500).fadeOut(2000);
+            } else {
+                $('#processing').hide();
+                $("#gritter-item-success").html('Falha ao salvar!');
+                $("#gritter-item-success").slideDown(300).delay(5500).fadeOut(2000);
+            }
+        }
+    });
+}
+
+// calcula a distancia  entre todos os pontos de uma rota
+function calcDistFromRoute(idbus) {
+    
+    $.ajax({
+        type: "POST",
+        data: {
+            idbus: idbus
+        },
+        url: $('#base-path').val()+'/routes/getRoute',
+        dataType: "json",
+        success: function(data) {
+            
+            if(data.success == true) {
+                
+                var array_points = data.points;
+                $('#processing').show();
+
+                for( var i = 0; i < array_points.length - 1; i++ ) {
+                    
+                    points_id.push({
+                        point1: array_points[i].idpoint, 
+                        point2: array_points[i+1].idpoint
+                    });
+                        
+                    var service = new google.maps.DistanceMatrixService();
+                    service.getDistanceMatrix(
+                    {
+                        origins: [ new google.maps.LatLng(array_points[i].latitude, array_points[i].longitude) ],
+                        destinations: [ new google.maps.LatLng(array_points[i+1].latitude, array_points[i+1].longitude) ],
+                        travelMode: google.maps.TravelMode.DRIVING,
+                        avoidHighways: false,
+                        avoidTolls: false
+                    }, callbackCalcRoute);
+                }
+                $('#processing').hide();
+            }
+        }
+    });
+}
+
+//  callback para receber o resultado do cálculo das distâncias com DirectionMatrix
+function callbackCalcRoute(response, status) {
+    if (status != google.maps.DistanceMatrixStatus.OK) {
+        alert('Error was: ' + status);
+    } else {
+        var origins = response.originAddresses;
+        var destinations = response.destinationAddresses;
+
+        var results = response.rows[0].elements;
+        saveConnectionPoints(points_id[indexPts].point1, points_id[indexPts].point2, results[0].distance.text);
+        indexPts++;
+    }
+}
+
+// salva as distãncias no BD
+function saveConnectionPoints(point1, point2, distance) {
+    
+    $.ajax({
+        type: "POST",
+        url: $('#base-path').val()+'/routes/saveConnectionPoints',
+        data: {
+            point1: point1,
+            point2: point2,
+            distance: distance
+        },
+        success: function(data) {      
+            if(data.result == true)
+                $("#gritter-item-success").slideDown(300).delay(5500).fadeOut(2000);
+        }
+    });
+    
 }

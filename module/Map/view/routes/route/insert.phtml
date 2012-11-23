@@ -1,27 +1,55 @@
+<input type="hidden" id="base-path" value="<?php echo $this->basePath(); ?>" />
+
 <div class="content">
-    <form method="POST" action="<?php echo $this->basePath() . '/routes/insert'; ?>">
         <div class="div-buses">
+            <select name="bus" id="bus">
             <?php foreach ($this->buses as $bus) : ?>
-                <input type="radio" value="<?php echo $bus->getIdBus(); ?>" name="bus" />
-                <?php echo $bus->getIdBus() . ' - ' . $bus->getDescription(); ?><br />
+                <option value="<?php echo $bus->getIdBus(); ?>">
+                    <?php echo $bus->getIdBus() . ' - ' . $bus->getDescription(); ?>
+                </option>
             <?php endforeach; ?>
+            </select>
         </div>
         <div class="div-points">
             <table>
-                <th>Marcar</th>
-                <th>Identifica&ccedil;&atilde;o</th>
-                <th>Observa&ccedil;&atilde;o</th>
+                <th colspan="4">Pontos</th>
+
                 <?php foreach ($this->points as $point) : ?>
-                    <tr>
-                        <td><input type="checkbox" value="<?php echo $point->getIdPoint(); ?>" name="points[]" /></td>
-                        <td><?php echo $point->getLabel(); ?></td>
-                        <td><?php echo $point->getObs(); ?></td>
+                    <tr id="row-<?php echo $point->getIdPoint(); ?>"> 
+                        <td>
+                            <label><?php echo $point->getIdPoint(); ?> | <?php echo $point->getLabel(); ?></label>
+                        <td>
+                        <td>
+                            <input type="button" id="submitpoint" value="Adicionar" onclick="saveInstant( $('#bus').val(), '<?php echo $point->getIdPoint(); ?>' );" />
+                        </td>    
                     </tr>
                 <?php endforeach; ?>
             </table>
         </div>
-        <div align="center">
-            <input type="submit" value="Enviar" name="submit" />
-        </div>
-    </form>
 </div>
+
+<style type="text/css">
+    #divdrag { width:350px; height:70px; padding:10px; border:1px solid #aaaaaa; overflow: auto;}
+</style>
+<script type="text/javascript">
+    var i = 0;
+    function allowDrop(ev)
+    {
+        ev.preventDefault();
+    }
+ 
+    function drag(ev)
+    {
+        ev.dataTransfer.setData("Text",ev.target.id);
+    }
+ 
+    function drop(ev)
+    {
+        var data = ev.dataTransfer.getData("Text");
+        ev.target.appendChild(document.getElementById(data));
+        
+        $('#'+data).attr("name", data);
+        alert($('#'+data).val());
+        ev.preventDefault();
+    }
+</script>

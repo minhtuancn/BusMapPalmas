@@ -32,24 +32,6 @@ class RouteController extends AbstractActionController {
                 ));
     }
 
-    function sort_arr_of_obj($array, $sortby, $direction = 'asc') {
-
-        $sortedArr = array();
-        $tmp_Array = $array;
-
-        if ($direction == 'asc') {
-            asort($tmp_Array);
-        } else {
-            arsort($tmp_Array);
-        }
-
-        foreach ($tmp_Array as $k => $tmp) {
-            $sortedArr[] = $array[$k];
-        }
-
-        return $sortedArr;
-    }
-
     public function insertAction() {
         $request = $this->getRequest();
 
@@ -61,22 +43,27 @@ class RouteController extends AbstractActionController {
                 ->getRepository('Map\Entity\Point')
                 ->findAll();
 
+        $result = false;
+
         if ($request->isPost()) {
-            $elements = $request->getPost()->toArray();
+            $post = $request->getPost()->toArray();
 
             try {
                 $service = $this->getServiceLocator()->get('Map\Service\BusPoint');
 
-                foreach ($elements['points'] as $elem) :
-                    $service->insert(array(
-                        'bus' => $elements['bus'],
-                        'point' => $elem
-                    ));
-                endforeach;
+                $service->insert(array(
+                    'bus' => $post['idbus'],
+                    'point' => $post['idpoint']
+                ));
+
+                $result = true;
             } catch (Exception $e) {
-                throw $e;
+                
             }
-            return $this->redirect()->toRoute('routes', array('controller' => 'routes'));
+
+            return new JsonModel(array(
+                        'success' => $result,
+                    ));
         }
 
         return new ViewModel(array(
@@ -110,8 +97,9 @@ class RouteController extends AbstractActionController {
                     $points[$count]['obs'] = $elem->getObs();
                     $count++;
                 endforeach;
-                                
+
                 $result = new JsonModel(array(
+                            'success' => true,
                             'points' => $points
                         ));
 
@@ -124,6 +112,31 @@ class RouteController extends AbstractActionController {
         return $result;
     }
 
+    public function saveConnectionPointsAction() {
+        $request = $this->getRequest();
+        $result = false;
+
+        if ($request->isPost()) {
+            $post = $request->getPost()->toArray();
+
+            $distance = split(" km", $post['distance']);
+            $post['distance'] = $distance[0];
+            
+            try {
+                $service = $this->getServiceLocator()->get('Map\Service\Connection');
+                $service->insert($post);
+
+                return new JsonModel(array(
+                            'success' => true,
+                        ));
+
+            } catch (Exception $e) {
+                throw $e;
+            }
+        }
+
+        return $result;
+    }
 }
 
 ?>

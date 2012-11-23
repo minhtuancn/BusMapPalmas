@@ -41,15 +41,28 @@
             <div id="processing" class="pro-growl-item-container">
                 <div class="pro-growl-item">
                     <img class="pro-growl-image" src="<?php echo $this->basePath() . '/images/loading.gif' ?>">
-                        <div class="pro-growl-message">
-                            <span class="pro-growl-title">Processando ...</span>
-                            <p></p>
-                        </div>
-                        <div style="clear: both;"></div>
+                    <div class="pro-growl-message">
+                        <span class="pro-growl-title">Processando ...</span>
+                        <p></p>
+                    </div>
+                    <div style="clear: both;"></div>
                 </div>
             </div>
         </div>
-        
+
+        <div class="ui-growl" style="z-index: 1000; display: none;">
+            <div id="gritter-item-success" class="ui-growl-item-container">
+                <div class="ui-growl-item">
+                    <img class="ui-growl-image" src="<?php echo $this->basePath() . '/images/info.png' ?>">
+                    <div class="ui-growl-message">
+                        <span class="ui-growl-title"></span>
+                        <p></p>
+                    </div>
+                    <div style="clear: both;"></div>
+                </div>
+            </div>
+        </div>
+
         <div class="navbar navbar-inverse navbar-fixed-top">
             <div class="navbar-inner">
                 <div class="container">
@@ -72,7 +85,7 @@
         </div>
 
         <div class="container" style="height: 100%; width: 100%">     
-            
+
             <?php echo $this->content; ?>
         </div> <!-- /container -->
 
