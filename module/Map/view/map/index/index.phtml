@@ -27,7 +27,15 @@
 
     <br />
     <div>
-        <button onclick="calcDistFromRoute(15);" >Vai porra!</button>
+        <select id="busroute" style="width: 60px;">
+            <?php foreach ($this->routes as $route): ?>
+                <option value="<?php echo $route->getIdBus(); ?>">
+                    <?php echo $route->getIdBus(); ?>
+                </option>
+            <?php endforeach; ?>
+        </select
+        <br />
+        <button onclick="calcDistFromRoute($('#busroute').val());" >Calcular distâncias</button>
     </div>
 </div>
 

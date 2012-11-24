@@ -8,8 +8,6 @@ use Doctrine\ORM\Mapping as ORM,
 /**
  * @ORM\Entity
  * @ORM\Table(name="point")
- * @ORM\Entity(repositoryClass="Map\Entity\PointRepository")
- * @ORM\Table(name="Point")
  * @property int $idpoint
  * @property string $label
  * @property decimal $latitude 

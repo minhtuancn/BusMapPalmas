@@ -337,6 +337,7 @@ function saveInstant(idbus, idpoint) {
 
 // calcula a distancia  entre todos os pontos de uma rota
 function calcDistFromRoute(idbus) {
+    $('#processing').show();
     
     $.ajax({
         type: "POST",
@@ -350,7 +351,7 @@ function calcDistFromRoute(idbus) {
             if(data.success == true) {
                 
                 var array_points = data.points;
-                $('#processing').show();
+             
 
                 for( var i = 0; i < array_points.length - 1; i++ ) {
                     
@@ -369,8 +370,8 @@ function calcDistFromRoute(idbus) {
                         avoidTolls: false
                     }, callbackCalcRoute);
                 }
-                $('#processing').hide();
             }
+            $('#processing').hide();
         }
     });
 }
